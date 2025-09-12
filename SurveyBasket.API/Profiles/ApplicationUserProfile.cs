@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using AutoMapper;
-using SurveyBasket.API.Models;
+using SurveyBasket.API.Entites;
 using SurveyBasket.API.DTOs.Response;
 using SurveyBasket.API.DTOs.Requist;
 

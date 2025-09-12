@@ -1,5 +1,6 @@
 using AutoMapper;
 using FluentValidation; // Ensure AutoMapper namespace is included
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using SharpGrip.FluentValidation.AutoValidation.Mvc.Extensions;
 using SurveyBasket.API.DTOs.Requist;
@@ -9,6 +10,14 @@ using SurveyBasket.API.Servece.IServece;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var conectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+builder.Services.AddDbContext<SurveyBasket.API.DBContext.ApplicationDBContext>(options =>
+{
+    options.UseSqlServer(conectionString);
+});
+
+
 
 // Add services to the container.
 
@@ -23,6 +32,7 @@ builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddAutoMapper(cfg => cfg.AddMaps(typeof(Program).Assembly));
 
 builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());    
+
 
 var app = builder.Build();
 
@@ -39,4 +49,4 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.Run();
+ app.Run();

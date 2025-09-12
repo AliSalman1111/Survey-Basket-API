@@ -3,10 +3,12 @@ using FluentValidation;
 using Mapster;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Razor.TagHelpers;
 using SurveyBasket.API.DTOs.Requist;
 using SurveyBasket.API.DTOs.Response;
-using SurveyBasket.API.Models;
+using SurveyBasket.API.Entites;
 using SurveyBasket.API.Servece.IServece;
+using System.Threading.Tasks;
 
 namespace SurveyBasket.API.Controllers
 {
@@ -27,9 +29,9 @@ namespace SurveyBasket.API.Controllers
 
 
         [HttpGet]
-        public IActionResult GetAll()
+        public async Task<IActionResult>   GetAll(CancellationToken cancellationToken)
         {
-            var polls = servecePoll.GetAll();
+            var polls = await servecePoll.GetAllAsync(cancellationToken);
             var response = mapper.Map<IEnumerable< PollResponse>>(polls);
 
             return Ok(response);
@@ -38,11 +40,11 @@ namespace SurveyBasket.API.Controllers
 
         [HttpGet]
         [Route("Get/{id}")]
-        public IActionResult Get(int id)
+        public async Task<IActionResult>  Get(int id, CancellationToken cancellationToken)
         {
-            var poll = servecePoll.Get(id);
+            var poll = await  servecePoll.Getasync(id,cancellationToken );
 
-          
+
             var response = mapper.Map<PollResponse>(poll);
 
             return poll == null ? NotFound() : Ok(response);
@@ -50,19 +52,15 @@ namespace SurveyBasket.API.Controllers
 
         [HttpPost]
         [Route("Add")]
-        public IActionResult Add(pollRequist poll)
+        public  async Task<IActionResult> Add(pollRequist poll, CancellationToken cancellationToken)
         {
 
 
-            //var validationResult = iValidator.Validate(poll);
-            //if(!validationResult.IsValid)
-            //{
-            //    return BadRequest(validationResult.Errors);
-            //}
+        
 
-            var map = mapper.Map<Poll>(poll);
+            var map =  mapper.Map<Poll>(poll);
 
-            var newpoll = servecePoll.Add(map);
+            var newpoll = await servecePoll.AddAsync(map, cancellationToken);
 
 
             return CreatedAtAction(nameof(Get), new { id = newpoll.Id }, newpoll);
@@ -73,16 +71,28 @@ namespace SurveyBasket.API.Controllers
 
         [HttpPut]
         [Route("Update/{id}")]
-        public IActionResult Update(int id, Poll poll)
+        public async Task<IActionResult>  Update(int id, pollRequist pollRequist  ,CancellationToken cancellationToken)
         {
-            var updatedPoll = servecePoll.update(id, poll);
+
+            var map = mapper.Map<Poll>(pollRequist);
+
+            var updatedPoll = await servecePoll.updateAsync(id, map, cancellationToken);
             return updatedPoll == null ? NotFound() : NoContent();
         }
+        [HttpPut]
+
+        [Route("UpdatePartial/{id}")]
+        public async Task<IActionResult> UpdatePartial(int id,  CancellationToken cancellationToken)
+        {
+            var updatedPoll = await servecePoll.updateAsyncIsPublished(id, cancellationToken);
+            return updatedPoll == null ? NotFound() : NoContent();
+        }
+
         [HttpDelete]
         [Route("Delete/{id}")]
-        public IActionResult Delete(int id)
+        public async Task<IActionResult> Delete(int id,CancellationToken cancellationToken)
         {
-            var isDeleted = servecePoll.Delete(id);
+            var isDeleted = await servecePoll.DeleteAsync(id, cancellationToken);
             return isDeleted == null ? NotFound() : NoContent();
 
         }
